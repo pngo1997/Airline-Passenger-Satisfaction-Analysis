@@ -1,0 +1,297 @@
+---
+title: "Presentation_Data Viz"
+author: "Chandana"
+date: "2024-05-31"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+# Load necessary libraries
+library(dplyr)
+library(fmsb)
+library(scales)
+library(tibble)
+library(ggplot2)
+library(tidyr)
+```
+
+
+```{r}
+setwd("C:/Users/maimu/OneDrive/Documents/DePaul/DSC 465")
+# Load the dataset
+satisfaction_df <- read.csv("airline_passenger_satisfaction.csv")
+
+# Function to calculate mode
+get_mode <- function(v) {
+  v <- v[!is.na(v)]  # Remove NA values
+  uniqv <- unique(v)
+  uniqv[which.max(tabulate(match(v, uniqv)))]
+}
+
+# Ensure relevant columns are numeric
+satisfaction_df <- satisfaction_df %>%
+  mutate(across(c(Departure.and.Arrival.Time.Convenience, Ease.of.Online.Booking, Check.in.Service, Online.Boarding, Gate.Location,
+                  On.board.Service, Seat.Comfort, Leg.Room.Service, Cleanliness, Food.and.Drink,
+                  In.flight.Service, In.flight.Wifi.Service, In.flight.Entertainment, Baggage.Handling), 
+                as.numeric))
+
+# Group Age
+satisfaction_df <- satisfaction_df %>%
+  mutate(Age_Group = case_when(
+    Age >= 0 & Age <= 12 ~ "Children",
+    Age >= 13 & Age <= 17 ~ "Teenagers",
+    Age >= 18 & Age <= 24 ~ "Young Adults",
+    Age >= 25 & Age <= 39 ~ "Adults",
+    Age >= 40 & Age <= 59 ~ "Mid-Aged",
+    Age >= 60 ~ "Seniors"
+  ))
+
+# Group ratings and calculate mode
+satisfaction_modes <- satisfaction_df %>%
+  group_by(Gender, Customer.Type, Age_Group, Class) %>%
+  summarise(across(c(Departure.and.Arrival.Time.Convenience, Ease.of.Online.Booking, Check.in.Service, Online.Boarding, Gate.Location,
+                     On.board.Service, Seat.Comfort, Leg.Room.Service, Cleanliness, Food.and.Drink,
+                     In.flight.Service, In.flight.Wifi.Service, In.flight.Entertainment, Baggage.Handling), 
+                   get_mode), .groups = 'drop') %>%
+  mutate(
+    `Booking Services` = Ease.of.Online.Booking,
+    `Travel Time Convenience` = Departure.and.Arrival.Time.Convenience,
+    `Pre-Boarding Services` = rowMeans(select(., Check.in.Service, Online.Boarding, Gate.Location), na.rm = TRUE),
+    `Flight Services` = rowMeans(select(. , On.board.Service, Seat.Comfort, Leg.Room.Service, Cleanliness, Food.and.Drink), na.rm = TRUE),
+    `Essential Services` = rowMeans(select(., In.flight.Service, In.flight.Wifi.Service, In.flight.Entertainment), na.rm = TRUE),
+    `Post Flight Services` = Baggage.Handling
+  )
+
+# Prepare data for radar chart
+ratings_by_class_type <- satisfaction_modes %>%
+  group_by(Class) %>%
+  summarise(across(`Booking Services`:`Post Flight Services`, get_mode), .groups = 'drop')
+ratings_by_class_type
+```
+
+```{r}
+# Reorder the data to have Business first, then First, and Economy
+ratings_by_class_type <- ratings_by_class_type %>%
+  arrange(factor(Class, levels = c("Business", "Economy Plus", "Economy")))
+ratings_by_class_type
+```
+
+
+```{r}
+# Prepare the data for fmsb radarchart
+ratings_data <- ratings_by_class_type %>%
+  select(`Booking Services`, `Travel Time Convenience`, `Pre-Boarding Services`, `Flight Services`, `Essential Services`, `Post Flight Services`) %>%
+  rbind(rep(5, 6), rep(1, 6), .)
+```
+
+
+```{r}
+# Define colors for each class
+colors <- c("#003049", "#D62828", "#FCBF49")
+fill_colors <- alpha(colors, 0.2)
+
+# Save the plot as a PNG file
+#png(filename = "Ratings_by_Class.png", width = 800, height = 800)
+
+
+# Create radar chart function
+create_beautiful_radarchart <- function(data, color = "#00AFBB", 
+                                        vlabels = colnames(data), vlcex = 0.7,
+                                        caxislabels = NULL, title = NULL, ...){
+  radarchart(
+    data, axistype = 1,
+    # Customize the polygon
+    pcol = color, pfcol = scales::alpha(color, 0.5), plwd = 10, plty = 1,
+    # Customize the grid
+    cglcol = "grey", cglty = 1, cglwd = 0.8,
+    # Customize the axis
+    axislabcol = "grey", 
+    # Variable labels
+    vlcex = vlcex, vlabels = vlabels,
+    caxislabels = caxislabels, title = title, ...
+  )
+}
+
+# Create radar chart with all classes
+par(mfrow = c(1, 1))
+radarchart(
+  ratings_data, axistype = 1,
+  # Customize the polygon
+  pcol = colors, pfcol = fill_colors, plwd = 2, plty = 1,
+  # Customize the grid
+  cglcol = "grey", cglty = 1, cglwd = 1.5,
+  # Customize the axis
+  axislabcol = "black", 
+  # Variable labels
+  vlcex = 1.0, vlabels = colnames(ratings_data),
+  caxislabels = c(1, 2, 3, 4, 5)
+)
+
+# Add legend
+title(main = "Service Ratings by Class", font.main = 2, family = "serif", cex.main = 1.6)
+
+# Add legend with a title
+legend(x = "topright", legend = c("Business", "Economy Plus", "Economy"), col = colors, pch = 20, title = "Class")
+
+#dev.off()
+```
+
+
+
+```{r}
+# Ensure relevant columns are numeric
+satisfaction_df <- satisfaction_df %>%
+  mutate(across(c(Departure.and.Arrival.Time.Convenience, Ease.of.Online.Booking, Check.in.Service, Online.Boarding, Gate.Location,
+                  On.board.Service, Seat.Comfort, Leg.Room.Service, Cleanliness, Food.and.Drink,
+                  In.flight.Service, In.flight.Wifi.Service, In.flight.Entertainment, Baggage.Handling), 
+                as.numeric))
+
+# Group Age
+satisfaction_df <- satisfaction_df %>%
+  mutate(Age_Group = case_when(
+    Age >= 0 & Age <= 12 ~ "Children",
+    Age >= 13 & Age <= 17 ~ "Teenagers",
+    Age >= 18 & Age <= 24 ~ "Young Adults",
+    Age >= 25 & Age <= 39 ~ "Adults",
+    Age >= 40 & Age <= 59 ~ "Mid-Aged",
+    Age >= 60 ~ "Seniors"
+  ))
+
+# Filter dataset for only Economy and Economy Plus classes
+satisfaction_df_filtered <- satisfaction_df %>%
+  filter(Class %in% c("Economy", "Economy Plus"))
+
+# Group ratings and calculate means for grouped services
+satisfaction_modes_filtered <- satisfaction_df_filtered %>%
+  group_by(Gender, Customer.Type, Age_Group, Class) %>%
+  summarise(across(c(Departure.and.Arrival.Time.Convenience,Ease.of.Online.Booking, Check.in.Service, Online.Boarding, Gate.Location,
+                     On.board.Service, Seat.Comfort, Leg.Room.Service, Cleanliness, Food.and.Drink,
+                     In.flight.Service, In.flight.Wifi.Service, In.flight.Entertainment, Baggage.Handling), 
+                   mean, na.rm = TRUE), .groups = 'drop') %>%
+  mutate(
+    `Booking Services` = Ease.of.Online.Booking,
+    `Travel Time Convenience` = Departure.and.Arrival.Time.Convenience,
+    `Pre-Boarding Services` = rowMeans(select(., Check.in.Service, Online.Boarding, Gate.Location), na.rm = TRUE),
+    `Flight Services` = rowMeans(select(. ,On.board.Service, Seat.Comfort, Leg.Room.Service, Cleanliness, Food.and.Drink), na.rm = TRUE),
+    `Essential Services` = rowMeans(select(., In.flight.Service, In.flight.Wifi.Service, In.flight.Entertainment), na.rm = TRUE),
+    `Post Flight Services` = Baggage.Handling
+  )
+
+# Gather the data for plots
+ratings_long <- satisfaction_modes_filtered %>%
+  pivot_longer(cols = c(`Booking Services`, `Travel Time Convenience`, `Pre-Boarding Services`, `Flight Services`, `Essential Services`, `Post Flight Services`), 
+               names_to = "Service_Type", values_to = "Rating")
+ratings_long$Age_Group <- factor(ratings_long$Age_Group, 
+                                 levels = c("Children", "Teenagers", "Young Adults", "Adults", "Mid-Aged", "Seniors"))
+
+# Define custom colors for age groups
+age_group_colors <- c("Children" = "#4F83CC", "Teenagers" = "#D62828", "Young Adults" = "#F77F00", 
+                      "Adults" = "#FCBF49", "Mid-Aged" = "#9467BD", "Seniors" = "#2CA02C")
+
+# Save the plot as a PNG file
+#png(filename = "Ratings_by_Age_with_Class_Filter.png", width = 1050, height = 900)
+
+# Create box plot
+box_plot <- ggplot(ratings_long, aes(x = Age_Group, y = Rating, fill = Age_Group)) +
+  geom_boxplot() +
+  facet_wrap(~ Service_Type, scales = "free") +
+  theme_minimal() +
+  scale_fill_manual("Age Group", values = age_group_colors) +
+  theme(axis.text.x = element_text(angle = 0, hjust = 0.5, size = 7)) +
+  labs(title = "Service Ratings by Age Group (Economy and Economy Plus)", x = "Age Group", y = "Rating")+
+  theme(
+    plot.title = element_text(family = "serif", face = "bold", size = 16), 
+    axis.text.x = element_blank(), 
+    axis.title.x = element_text(size = 12), 
+    axis.title.y = element_text(size = 12),
+        panel.border = element_rect(color = "black", fill = NA)
+  )
+
+
+# Print the box plot
+print(box_plot)
+
+#dev.off()
+```
+```{r}
+# Ensure relevant columns are numeric
+satisfaction_df <- satisfaction_df %>%
+  mutate(across(c(Departure.and.Arrival.Time.Convenience, Ease.of.Online.Booking, Check.in.Service, Online.Boarding, Gate.Location,
+                  On.board.Service, Seat.Comfort, Leg.Room.Service, Cleanliness, Food.and.Drink,
+                  In.flight.Service, In.flight.Wifi.Service, In.flight.Entertainment, Baggage.Handling), 
+                as.numeric))
+
+# Group Age
+satisfaction_df <- satisfaction_df %>%
+  mutate(Age_Group = case_when(
+    Age >= 0 & Age <= 12 ~ "Children",
+    Age >= 13 & Age <= 17 ~ "Teenagers",
+    Age >= 18 & Age <= 24 ~ "Young Adults",
+    Age >= 25 & Age <= 39 ~ "Adults",
+    Age >= 40 & Age <= 59 ~ "Mid-Aged",
+    Age >= 60 ~ "Seniors"
+  ))
+
+# Filter dataset for only Economy and Economy Plus classes
+satisfaction_df_filtered <- satisfaction_df %>%
+  filter(Class %in% c("Economy", "Economy Plus"))
+
+# Group ratings and calculate means for grouped services
+satisfaction_modes_filtered <- satisfaction_df_filtered %>%
+  group_by(Gender, Customer.Type, Age_Group, Class) %>%
+  summarise(across(c(Departure.and.Arrival.Time.Convenience,Ease.of.Online.Booking, Check.in.Service, Online.Boarding, Gate.Location,
+                     On.board.Service, Seat.Comfort, Leg.Room.Service, Cleanliness, Food.and.Drink,
+                     In.flight.Service, In.flight.Wifi.Service, In.flight.Entertainment, Baggage.Handling), 
+                   mean, na.rm = TRUE), .groups = 'drop') %>%
+  mutate(
+    `Booking Services` = Ease.of.Online.Booking,
+    `Travel Time Convenience` = Departure.and.Arrival.Time.Convenience,
+    `Pre-Boarding Services` = rowMeans(select(., Check.in.Service, Online.Boarding, Gate.Location), na.rm = TRUE),
+    `Flight Services` = rowMeans(select(. ,On.board.Service, Seat.Comfort, Leg.Room.Service, Cleanliness, Food.and.Drink), na.rm = TRUE),
+    `Essential Services` = rowMeans(select(., In.flight.Service, In.flight.Wifi.Service, In.flight.Entertainment), na.rm = TRUE),
+    `Post Flight Services` = Baggage.Handling
+  )
+
+# Gather the data for plots
+ratings_long <- satisfaction_modes_filtered %>%
+  pivot_longer(cols = c(`Booking Services`, `Travel Time Convenience`, `Pre-Boarding Services`, `Flight Services`, `Essential Services`, `Post Flight Services`), 
+               names_to = "Service_Type", values_to = "Rating")
+ratings_long$Age_Group <- factor(ratings_long$Age_Group, 
+                                 levels = c("Children", "Teenagers", "Young Adults", "Adults", "Mid-Aged", "Seniors"))
+
+# Define custom colors for age groups
+age_group_colors <- c("Children" = "#4F83CC", "Teenagers" = "#D62828", "Young Adults" = "#F77F00", 
+                      "Adults" = "#FCBF49", "Mid-Aged" = "#9467BD", "Seniors" = "#2CA02C")
+
+# Save the plot as a PNG file
+# Note: Adjust width and height to increase the overall height of the plot
+#png(filename = "Ratings_by_Age_with_Class_Filter.png", width = 1050, height = 900)
+
+# Create box plot
+box_plot <- ggplot(ratings_long, aes(x = Age_Group, y = Rating, fill = Age_Group)) +
+   geom_boxplot(width = 0.7, size = 0.2, # Adjust size for overall lines of the box plot
+               fatten = 1) + 
+  facet_wrap(~ Service_Type, scales = "free_y") +
+  theme_minimal() +
+  scale_fill_manual("Age Group", values = age_group_colors) +
+  theme(axis.text.x = element_text(angle = 0, hjust = 0.5, size = 7)) +
+  labs(title = "Service Ratings by Age Group (Economy and Economy Plus)", x = "Age Group", y = "Rating")+
+  theme(
+    plot.title = element_text(family = "serif", face = "bold", size = 16), 
+    axis.text.x = element_blank(), 
+    axis.title.x = element_text(size = 12), 
+    axis.title.y = element_text(size = 12),
+    panel.border = element_rect(color = "black", fill = NA)
+  ) +
+  scale_y_continuous(breaks = seq(1.5, 4, by = 0.5), limits = c(1.5, 4))
+
+# Print the box plot
+print(box_plot)
+
+# Turn off the PNG device
+#dev.off()
+
+
+```
+
