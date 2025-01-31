@@ -120,13 +120,13 @@ Airline companies continuously seek ways to **improve customer satisfaction** ac
 ## 📊 Sample Visualizations  
 
 ### **1. Passenger Satisfaction Distribution**
-![Satisfaction Distribution](https://github.com/pngo1997/Images/blob/main/VS4%20-%20Satisfaction.png)  
+![Satisfaction Distribution](https://github.com/pngo1997/Images/blob/main/VS%204%20-%20Satisfaction.png)  
 
 ### **2. Service Ratings Across Airline Classes**
-![Radar Chart](https://github.com/pngo1997/Images/blob/main/VS4%20-%20Service%20rating.png)  
+![Radar Chart](https://github.com/pngo1997/Images/blob/main/VS%204%20-%20Service%20rating.png)  
 
 ### **3. Heatmap of Service Needs Improvement**
-![Service Heatmap](https://github.com/pngo1997/Images/blob/main/VS4%20-%20Service%20Improvement.png)  
+![Service Heatmap](https://github.com/pngo1997/Images/blob/main/VS%204%20-%20Service%20Improvement.png)  
 
 ---
 
