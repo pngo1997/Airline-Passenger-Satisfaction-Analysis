@@ -120,12 +120,17 @@ Airline companies continuously seek ways to **improve customer satisfaction** ac
 ## 📊 Sample Visualizations  
 
 ### **1. Passenger Satisfaction Distribution**
+- Given six Age Groups, the above stacked bar charts display the number of passengers distributed across sub-groups. Noticeably, Adults and Mid Aged passengers (25-59 years old) represent the majority of the data, particularly Mid-Aged passengers flying Business Class with 32,000 passengers, indicating a key demographic for airlines. The proportional stacked bar charts below emphasize the satisfaction level distribution as percentages within each sub-group. The overall pattern shows that satisfaction levels tend to increase with age, showing that older age groups report higher satisfaction with their flight experiences. 
+- A notable pattern is that the majority of passengers are more Neutral or Dissatisfied with their flight experience, suggesting that airlines need to review their services and make improvement plans. Indeed, across three classes, Business Class has more Satisfied feedback. This suggests that Business Class services meet the expectations of these passengers better. While Economy and Economy Plus show the same pattern, with slightly higher satisfaction for Economy Plus, which is reasonable considering passengers pay a slight premium for the upgrade.
 ![Satisfaction Distribution](https://github.com/pngo1997/Images/blob/main/VS%204%20-%20Satisfaction.png)  
 
 ### **2. Service Ratings Across Airline Classes**
+- The radar chart visualizes service ratings across Business, Economy Plus, and Economy classes, covering aspects like Booking Services, Travel Time Convenience, Post Flight Services, Essential Services, Flight Services, and Pre-Boarding Services. Business class consistently shows higher ratings across all categories, indicating greater passenger satisfaction, especially in Pre Boarding and Post Flight Services. Economy Plus has moderate ratings, higher than Economy but lower than Business, with balanced satisfaction levels. Economy class shows the lowest ratings, particularly in Essential Services and Flight Services, highlighting areas for improvement. Enhancing these specific areas in Economy could significantly elevate overall passenger satisfaction.
 ![Radar Chart](https://github.com/pngo1997/Images/blob/main/VS%204%20-%20Service%20rating.png)  
 
 ### **3. Heatmap of Service Needs Improvement**
+- The heatmap reveals several key insights regarding passenger ratings for various services across different travel types and flight distance categories. Notably, Ease of Online Booking is the service with the lowest average ratings across all services, particularly among personal travel passengers. The lowest average rating is observed in the Personal Short-haul category for Ease of Online Booking, with a rating of 2.39. This indicates a significant area for improvement in the online booking process for personal travelers. 
+- Interestingly, while business passengers generally provide higher average ratings across most services, the Check-in Service stands out as an exception. Personal travelers, especially in the Short-haul category, rate the Check-in Service higher, with a notable rating of 3.33 compared to business travelers. This suggests that personal travelers find the check-in process more satisfactory, highlighting a potential strength in this service area.
 ![Service Heatmap](https://github.com/pngo1997/Images/blob/main/VS%204%20-%20Service%20Improvement.png)  
 
 ---
